@@ -5,7 +5,6 @@ const cakeRecipes = require("./cake-recipes.json");
 // Function that returns all authors of a given recipe list.
 function getUniqueAuthors(recipes) {
   const authors = [];
-
   recipes.forEach((recipe) => {
     if (!authors.includes(recipe.Author)) {
       authors.push(recipe.Author);
@@ -43,14 +42,16 @@ authors.forEach((author) => {
 });
 
 // Function that returns a list of recipes that contain a given ingredient.
-function logRecipesWithIngredient(recipes, ingredient) {
-  const matchingRecipes = getRecipesByIngredient(recipes, ingredient);
-  console.log(`Recipes containing '${ingredient}':`);
-  recipeName(matchingRecipes);
+function getRecipesByIngredient(recipes, ingredient) {
+  return recipes.filter((recipe) =>
+    recipe.Ingredients.some((ing) =>
+      ing.toLowerCase().includes(ingredient.toLowerCase())
+    )
+  );
 }
 
 // Function that takes  a list of recipe and a name as input.
-function findRecipeByName(recipes, name = "") {
+function getRecipeByName(recipes, name = "") {
   if (!name) {
     console.log("No recipe name provided.");
     return null;
@@ -62,7 +63,7 @@ function findRecipeByName(recipes, name = "") {
 }
 
 const recipeNameToSearch = "";
-const foundRecipe = findRecipeByName(cakeRecipes, recipeNameToSearch);
+const foundRecipe = getRecipeByName(cakeRecipes, recipeNameToSearch);
 
 if (foundRecipe) {
   console.log(`Recipe found:`, foundRecipe);
@@ -84,6 +85,8 @@ console.log(allIngredientsFromSpecificAuthor);
 
 // Part 2
 
+let savedIngredients = [];
+
 const displayMenu = () => {
   console.log("\nRecipe Management System Menu:");
   console.log("1. Show All Authors");
@@ -103,11 +106,16 @@ do {
 
   switch (choice) {
     case 1:
-      showAllAuthors(cakeRecipes);
+      console.log("Unique authors: ", getUniqueAuthors(cakeRecipes));
       break;
     case 2:
       const author = prompt("Enter the author's name: ");
-      showRecipeByAuthor(cakeRecipes, author);
+      const recipesByAuthor = getRecipesByAuthor(cakeRecipes, author);
+      if (recipesByAuthor.length > 0) {
+        console.log(`${author}'s recipes:`, recipesByAuthor);
+      } else {
+        console.log(`No recipes found for ${author}.`);
+      }
       break;
     case 3:
       const ingredient = prompt("Enter the ingredient: ");
@@ -120,15 +128,18 @@ do {
       const recipe = getRecipeByName(cakeRecipes, recipeNameToSearch);
       if (recipe) {
         console.log("Recipe found: ", recipe);
-        savedIngredient = recipe.Ingredients;
-        console.log("Saved Ingredient: ", savedIngredient);
+        savedIngredients = recipe.Ingredients;
+        console.log("Saved Ingredient: ", savedIngredients.join(","));
       } else {
         console.log("No recipe found.");
       }
       break;
     case 5:
-      const allIngredients = getAllIngredients(cakeRecipes);
-      console.log("All ingredients: ", allIngredients);
+      if (savedIngredients.length > 0) {
+        console.log("All saved ingredients: ", savedIngredients.join(","));
+      } else {
+        console.log("No ingredients saved yet.");
+      }
       break;
     case 0:
       console.log("Exiting...");
